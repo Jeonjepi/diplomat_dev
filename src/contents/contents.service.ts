@@ -12,44 +12,64 @@ export class ContentsService {
   ){}
 
   
-  async getfiles(queryString){
-    const { category, offset, limit, order } = queryString
-    console.log("qe", category)
-
-    const findCategory = await this.contentRepository.findOne({where:{content_category:Equal(category)}})
-    if(!findCategory){
-      throw new NotFoundException({
-        message : 'category not found'
-      })
+  async getfiles(queryString) {
+    const { category, offset, limit, order } = queryString;
+  
+    const findCategory = await this.contentRepository.findOne({ where: { content_category: category } });
+  
+    if (!findCategory) {
+      throw new NotFoundException({ message: 'category not found' });
     }
-
-    let dir = '/home/caitory/doplomat_upload' + `${category}`
-    fs.readdir(dir, (err, files) => {
-      console.log('test', files);
+  
+    let dir = '/home/caitory/diplomat_upload/' + `${category}`;
+    
+    const fileCountPromise = new Promise((resolve, reject) => {
+      fs.readdir(dir, (err, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(files.length);
+        }
+      });
     });
-
-    const findFile = await this.contentRepository.createQueryBuilder('contents')
-    .select([
-      'contents.content_id as content_id',
-      'contents.content_name as content_name',
-      'contents.content_path as content_path',
-      'contents.content_category as content_category',
-      'contents.content_download as content_download',
-      'contents.content_create_at as content_create_at',
-    ])
-
-    if(category) findFile.where('contents.content_category =:category', {category :category})
-    if(order == '+create_at'){
-      findFile.orderBy('contents.content_create_at', 'ASC')
-    }else if(order == '-create_at'){
-      findFile.orderBy('contents.content_create_at', 'DESC')
+  
+    try {
+      const fileCount = await fileCountPromise;
+  
+      const findFile = this.contentRepository.createQueryBuilder('contents')
+        .select([
+          'contents.content_id as id',
+          'contents.content_name as filename',
+          'contents.content_download as fileDownloadUri',
+        ]);
+  
+      if (category) findFile.where('contents.content_category = :category', { category: category });
+  
+      if (order == '+create_at') {
+        findFile.orderBy('contents.content_create_at', 'ASC');
+      } else if (order == '-create_at') {
+        findFile.orderBy('contents.content_create_at', 'DESC');
+      }
+  
+      if (limit) findFile.limit(limit).offset(offset);
+  
+      const result = await findFile.getRawMany();
+  
+      const data = {
+        paginate: {
+          totalElements: fileCount,
+        },
+        contents: result,
+      };
+  
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.error(error);
+      // Handle any errors here.
+      return null; // or an error response as needed
     }
-    if (limit) findFile.limit(limit).offset(offset)
-
-    const result = await findFile.getRawMany()
-    return result;
   }
-
   async uploadFiles(reqBody, file){
 
     const content = JSON.parse(JSON.stringify(file))
@@ -86,7 +106,6 @@ export class ContentsService {
         message:'file not found'
       })
     }
-
     fs.unlink(findFile?.content_path, (err) => {
       console.log(err)
     })

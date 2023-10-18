@@ -17,7 +17,6 @@ export class ContentsController {
   @Post('/uploadFile')
   @UseInterceptors(FileFieldsInterceptor([{name : 'file'}], multerDiskOptions))
   uploadFiles(@Body() reqBody, @UploadedFiles() file){
-    console.log(reqBody)
     return this.contentsService.uploadFiles(reqBody, file)
   }
 
@@ -30,7 +29,6 @@ export class ContentsController {
   @Get('/download/:category/:fileName')
   downloadFile(@Param() param, @Res() res){
     const {category, fileName} = param
-    console.log(param)
     const url = `/home/caitory/diplomat_upload/${category}/${fileName}`
     return res.download(`${url}`)
   }

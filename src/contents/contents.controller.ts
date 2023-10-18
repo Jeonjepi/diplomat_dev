@@ -31,7 +31,7 @@ export class ContentsController {
   downloadFile(@Param() param, @Res() res){
     const {category, fileName} = param
     console.log(param)
-    const url = `${category}/${fileName}`
-    return res.download(url)
+    const url = `/home/caitory/diplomat_upload/${category}/${fileName}`
+    return res.download(`${url}`)
   }
 }

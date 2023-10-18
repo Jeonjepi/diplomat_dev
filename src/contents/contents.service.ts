@@ -65,12 +65,13 @@ export class ContentsService {
         message : 'file name already taken'
       })
     }
-
-    const url = 'https://diplomat-api.caitory.com/'
+    console.log(tmp[0][0])
+    const url = 'https://diplomat-api.caitory.com/download/' + `${category}/${tmp[0][0].filename}`
     const createContent = this.contentRepository.create({
       content_name:name,
       content_category:category,
       content_path:tmp[0][0]?.path,
+      content_download:url
     })
     await this.contentRepository.save(createContent)
 

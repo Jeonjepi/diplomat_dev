@@ -15,6 +15,9 @@ export class Contents{
     @Column("varchar", {length:255, nullable:true})
     content_category:string;
 
+    @Column("varchar", {length:255, nullable:true})
+    content_download:string;
+
     @CreateDateColumn()
     content_create_at:Date;
 }

@@ -13,15 +13,20 @@ export class ContentsService {
 
   
   async getfiles(queryString){
-    console.log("qe", queryString)
     const { category, offset, limit, order } = queryString
+    console.log("qe", category)
 
     const findCategory = await this.contentRepository.findOne({where:{content_category:Equal(category)}})
-    if(findCategory){
+    if(!findCategory){
       throw new NotFoundException({
         message : 'category not found'
       })
     }
+
+    let dir = '/home/caitory/doplomat_upload' + `${category}`
+    fs.readdir(dir, (err, files) => {
+      console.log('test', files);
+    });
 
     const findFile = await this.contentRepository.createQueryBuilder('contents')
     .select([
@@ -29,6 +34,7 @@ export class ContentsService {
       'contents.content_name as content_name',
       'contents.content_path as content_path',
       'contents.content_category as content_category',
+      'contents.content_download as content_download',
       'contents.content_create_at as content_create_at',
     ])
 
@@ -59,6 +65,8 @@ export class ContentsService {
         message : 'file name already taken'
       })
     }
+
+    const url = 'https://diplomat-api.caitory.com/'
     const createContent = this.contentRepository.create({
       content_name:name,
       content_category:category,

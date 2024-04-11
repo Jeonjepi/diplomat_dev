@@ -23,25 +23,25 @@ export class ContentsService {
   
     let dir = '/home/caitory/diplomat_upload/' + `${category}`;
     
-    const fileCountPromise = new Promise((resolve, reject) => {
-      fs.readdir(dir, (err, files) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(files.length);
-        }
-      });
-    });
-    console.log("test", await fileCountPromise)
+    // const fileCountPromise = new Promise((resolve, reject) => {
+    //   fs.readdir(dir, (err, files) => {
+    //     if (err) {
+    //       reject(err);
+    //     } else {
+    //       resolve(files.length);
+    //     }
+    //   });
+    // });
+
     try {
-      const fileCount = await fileCountPromise;
   
       const findFile = this.contentRepository.createQueryBuilder('contents')
         .select([
           'contents.content_id as id',
           'contents.content_name as filename',
           'contents.content_download as fileDownloadUri',
-        ]);
+        ])
+        .orderBy('contents.content_create_at', 'DESC')
   
       if (category) findFile.where('contents.content_category = :category', { category: category });
   

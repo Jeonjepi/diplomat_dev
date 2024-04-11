@@ -32,7 +32,7 @@ export class ContentsService {
         }
       });
     });
-  
+    console.log("test", await fileCountPromise)
     try {
       const fileCount = await fileCountPromise;
   
@@ -50,14 +50,14 @@ export class ContentsService {
       } else if (order == '-create_at') {
         findFile.orderBy('contents.content_create_at', 'DESC');
       }
-  
       if (limit) findFile.limit(limit).offset(offset);
-  
+      
       const result = await findFile.getRawMany();
+      console.log(result.length)
   
       const data = {
         paginate: {
-          totalElements: fileCount,
+          totalElements: result.length,
         },
         contents: result,
       };
